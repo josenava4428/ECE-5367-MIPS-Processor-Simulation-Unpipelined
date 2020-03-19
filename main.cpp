@@ -15,24 +15,21 @@ using namespace std;
 int strToInt(string number){
 	int stringSize = number.size();
 	int returnVal = 0;
-
 	for(int i = 0; i < stringSize; i++)
 	{
 		returnVal += (number[i] - 48) * pow(10, (stringSize - i - 1)); 
 	}
-
 	return returnVal;
 }
-
 int binaryStrToInt(string number)
 {
 	int stringSize = number.size();
 	int returnVal = 0;
-
 	for(int i = 0; i < stringSize; i++)
 	{
 		returnVal += (number[i] - 48) * pow(2, (stringSize - i - 1));
 	}
+	return returnVal;
 }
 
 struct registerNode
@@ -168,7 +165,7 @@ public:
 			}
 			opcodeNum = binaryStrToInt(opcode);
 			//000000 00010 00011 00100 00000 100000
-			if(opcode == 0)
+			if(opcodeNum == 0)
 			{
 				//I know the instruction is of R type
 				for(int i = 6; i < 11; i++)
@@ -178,7 +175,7 @@ public:
 
 				}
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
-				for(int = 11; i < 16; i++)
+				for(int i = 11; i < 16; i++)
 				{
 					//this tells me the target register
 					targetRegister += codeLine[i];
@@ -199,10 +196,29 @@ public:
 				for(int i = 26; i < 32; i++)
 				{
 					//this tells the function to carry out
-					function += ccodeLine[i];
+					function += codeLine[i];
 				}
 				functionNum = binaryStrToInt(function);
 				//if to go to the appropriate function
+				if(functionNum == 32)
+				{
+					//function to be carried out is addition
+					add(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+				}
+				else if(functionNum == 34)
+				{
+					//function to be carried out is subtraction
+					sub(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+				}
+				else if(functionNum == 42)
+				{
+					//function to be carried out is set less than
+					slt(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+				}
+				else
+				{
+					//Function is not one of 8 executable by this program, should not be an issue but may want to output an error or a simple message
+				}
 			}
 			else
 			{
@@ -236,11 +252,89 @@ public:
 	//R type instruction functions
 	void add(int sourceRegister, int targetRegister, int destinationRegister)
 	{
-
+		int sourceContent, targetContent, destinationContent;
+		bool destinationExists = false;
+		//need to check list if destination register exists if not new node must be created
+		registerNode *cu = registerHead;
+		while(cu != NULL)
+		{
+			if(cu -> registerNumber == sourceRegister)
+			{
+				sourceContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == targetRegister)
+			{
+				targetContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == destinationRegister)
+			{
+				destinationExists = true;
+			}
+			cu = cu -> next;
+		}
+		destinationContent = sourceContent + targetContent;
+		if(destinationExists == true)
+		{
+			//overwrite addition calculation in existing register
+			cu = registerHead;
+			while(cu != NULL)
+			{
+				if(cu -> registerNumber == destinationRegister)
+				{
+					cu -> registerContent = destinationContent;
+					break;
+				}
+				cu = cu -> next;
+			}
+		}
+		else
+		{
+			//destination does not exist, create and place accordingly
+			appendRegisterNode(destinationRegister, destinationContent);
+		}
 	};
 	void sub(int sourceRegister, int targetRegister, int destinationRegister)
 	{
-
+		int sourceContent, targetContent, destinationContent;
+		bool destinationExists = false;
+		//need to check list if destination register exists if not new node must be created
+		registerNode *cu = registerHead;
+		while(cu != NULL)
+		{
+			if(cu -> registerNumber == sourceRegister)
+			{
+				sourceContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == targetRegister)
+			{
+				targetContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == destinationRegister)
+			{
+				destinationExists = true;
+			}
+			cu = cu -> next;
+		}
+		destinationContent = sourceContent - targetContent;
+		if(destinationExists == true)
+		{
+			//overwrite addition calculation in existing register
+			cu = registerHead;
+			while(cu != NULL)
+			{
+				if(cu -> registerNumber == destinationRegister)
+				{
+					cu -> registerContent = destinationContent;
+					break;
+				}
+				cu = cu -> next;
+			}
+		}
+		else
+		{
+			//destination does not exist, create and place accordingly
+			appendRegisterNode(destinationRegister, destinationContent);
+		}
 	};
 	void slt(int sourceRegister, int targetRegister, int destinationRegister)
 	{
@@ -367,14 +461,12 @@ void mipsProcessor(string inputFileName, string outputFileName)
 			codeCount++;
 		}
 	}
-
 	//call code execution
 	processor.executeCode(outputFileName);
 
 	processor.printRegisterList();
 	processor.printMemoryList();
 	processor.printCodeList();
-
 
 	ils.close();
 }
