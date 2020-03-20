@@ -152,53 +152,67 @@ public:
 		ofstream ols;
 		ols.open(outputFile);
 
-		codeNode *cu;
-		cu = codeHead;
-		string opcode, sourceRegister, targetRegister, destinationRegister, shiftAmount, function, codeLine;
-		int opcodeNum, sourceRegisterNum, targetRegisterNum, destinationRegisterNum, shiftAmountNum, functionNum;
-		while(cu != NULL)
+		codeNode *cuCode;
+		cuCode = codeHead;
+		int linesExecuted = 0;
+		while(cuCode != NULL)
 		{
-			codeLine = cu -> binaryCode;
+			string opcode, sourceRegister, targetRegister, destinationRegister, shiftAmount, function, offset, codeLine;
+			int opcodeNum, sourceRegisterNum, targetRegisterNum, destinationRegisterNum, shiftAmountNum, functionNum, offsetNum;
+			codeLine = cuCode -> binaryCode;
 			for(int i = 0; i < 6; i++)
 			{
 				opcode += codeLine[i];
 			}
+			cout << opcode;
 			opcodeNum = binaryStrToInt(opcode);
+			cout << opcodeNum << endl;
 			//000000 00010 00011 00100 00000 100000
+			//will need to write code part to output file in if statements need to figure out how IF,ID, EX, MEM, and WB work first
 			if(opcodeNum == 0)
 			{
 				//I know the instruction is of R type
 				for(int i = 6; i < 11; i++)
 				{
 					//this tells me the source register
-					sourceRegister +=codeLine[i];
+					sourceRegister += codeLine[i];
 
 				}
+				cout << sourceRegister;
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
+				cout << sourceRegisterNum << endl;
 				for(int i = 11; i < 16; i++)
 				{
 					//this tells me the target register
 					targetRegister += codeLine[i];
 				}
+				cout << targetRegister;
 				targetRegisterNum = binaryStrToInt(targetRegister);
+				cout << targetRegisterNum << endl;
 				for(int i = 16; i < 21; i++)
 				{
 					//this tells me the destination register
 					destinationRegister += codeLine[i];
 				}
+				cout << destinationRegister;
 				destinationRegisterNum = binaryStrToInt(destinationRegister);
+				cout << destinationRegisterNum << endl;
 				for(int i = 21; i < 26; i++)
 				{
 					//this tells me the shift amount (usually and hopefully always zero)
 					shiftAmount += codeLine[i];
 				}
+				cout << shiftAmount;
 				shiftAmountNum = binaryStrToInt(shiftAmount);
+				cout << shiftAmountNum << endl; 
 				for(int i = 26; i < 32; i++)
 				{
 					//this tells the function to carry out
 					function += codeLine[i];
 				}
+				cout << function;
 				functionNum = binaryStrToInt(function);
+				cout << functionNum << endl;
 				//if to go to the appropriate function
 				if(functionNum == 32)
 				{
@@ -223,31 +237,191 @@ public:
 			else
 			{
 				//I know the instruction is of I type
+				for(int i = 6; i < 11; i++)
+				{
+					sourceRegister += codeLine[i];
+				}
+				cout << sourceRegister;
+				sourceRegisterNum = binaryStrToInt(sourceRegister);
+				cout << sourceRegisterNum << endl;
+				for(int i = 11; i < 16; i++)
+				{
+					targetRegister += codeLine[i];
+				}
+				cout << targetRegister;
+				targetRegisterNum = binaryStrToInt(targetRegister);
+				cout << targetRegisterNum << endl;
+				for(int i = 16; i < 32; i++)
+				{
+					offset += codeLine[i];
+				}
+				cout << offset;
+				offsetNum = binaryStrToInt(offset);
+				cout << offsetNum << endl;
+				if(opcodeNum == 35)
+				{
+					//call loadWord function
+					//loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
+				}
+				else if(opcodeNum == 43)
+				{
+					//call storeWord function
+					storeWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
+				}
+				else if(opcodeNum == 8)
+				{
+					//call addI function
+					addI(sourceRegisterNum, destinationRegisterNum, offsetNum);
+				}
+				else if(opcodeNum == 4)
+				{
+					//call beq function
+					if(sourceRegisterNum == destinationRegisterNum)
+					{
+						for(int i = 0; i < offsetNum; i++) //might not need the minus one
+						{
+							cuCode = cuCode -> next;
+						}
+					}
+				}
+				else if(opcodeNum == 5)
+				{
+					//call ben function
+					if(sourceRegisterNum != destinationRegisterNum)
+					{
+						for(int i = 0; i < offsetNum; i++) //might not need the minus one
+						{
+							cuCode = cuCode -> next;
+						}
+					}
+				}
 			}
+			cuCode = cuCode -> next;
+			linesExecuted++;
 		}
-		//here write to file reg and mem part
+		//here write to file reg and mem part////////////////////////////////////
+
 		ols.close();
 	};
 	//I type instruction functions
 	void loadWord(int sourceRegister, int destinationRegister, int offset)
 	{
-
+		//need to access memory list here
+		int memLocation, sourceContent, destinationContent;
+		bool destinationExists = false; 
+		registerNode *cuRegister = registerHead;
+		memoryNode *cuMemory = memoryHead;
+		while(cuRegister != NULL)
+		{
+			if(cuRegister -> registerNumber == sourceRegister)
+			{
+				sourceContent = cuRegister -> registerContent;
+			}
+			else if(cuRegister -> registerNumber == destinationRegister)
+			{
+				destinationExists = true;
+			}
+			cuRegister = cuRegister -> next;
+		}
+		memLocation = sourceContent + offset;
+		while(cuMemory != NULL)
+		{
+			if(cuMemory -> memoryLocation == memLocation)
+			{
+				destinationContent = cuMemory -> memoryContents;
+				break;
+			}
+			cuMemory = cuMemory -> next;
+		}
+		//place memory contents in destination register
+		if(destinationExists == true)
+		{
+			cuRegister = registerHead;
+			while(cuRegister != NULL)
+			{
+				if(cuRegister -> registerNumber == destinationRegister)
+				{
+					cuRegister -> registerContent = destinationContent;
+					break;
+				}
+				cuRegister = cuRegister -> next;
+			}
+		}
+		else
+		{
+			//destination does not exist, create and place accordingly
+			appendRegisterNode(destinationRegister, destinationContent);
+		}
 	};
 	void storeWord(int sourceRegister, int destinationRegister, int offset)
 	{
-
+		//need to access memory list here
+		int memLocation, sourceContent, destinationContent;
+		bool memoryExists = false; 
+		registerNode *cuRegister = registerHead;
+		memoryNode *cuMemory = memoryHead;
+		while(cuRegister != NULL)
+		{
+			if(cuRegister -> registerNumber == sourceRegister)
+			{
+				sourceContent = cuRegister -> registerContent;
+			}
+			else if(cuRegister -> registerNumber == destinationRegister)
+			{
+				destinationContent = cuRegister -> registerContent;
+			}
+			cuRegister = cuRegister -> next;
+		}
+		memLocation = offset + sourceContent;
+		while(cuMemory != NULL)
+		{
+			if(cuMemory -> memoryLocation == memLocation)
+			{
+				memoryExists = true;
+				cuMemory -> memoryContents = destinationContent;
+				break;
+			}
+		}
+		if(memoryExists == false)
+		{
+			appendMemoryNode(memLocation, destinationContent);
+		}
 	};
-	void addI()
+	void addI(int sourceRegister, int destinationRegister, int immediate)
 	{
-
-	};
-	void beq()
-	{
-
-	};
-	void bne()
-	{
-
+		int sourceContent, destinationContent;
+		bool destinationExists = false;
+		registerNode *cu = registerHead;
+		while(cu != NULL)
+		{
+			if(cu -> registerNumber == sourceRegister)
+			{
+				sourceContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == destinationRegister)
+			{
+				destinationExists = true;
+			}
+			cu = cu -> next;
+		}
+		destinationContent = sourceContent + immediate;
+		if(destinationExists == true)
+		{
+			cu = registerHead;
+			while(cu != NULL)
+			{
+				if(cu -> registerNumber == destinationRegister)
+				{
+					cu -> registerContent = destinationContent;
+					break;
+				}
+				cu = cu -> next;
+			}
+		}
+		else
+		{
+			appendRegisterNode(destinationRegister, destinationContent);
+		}
 	};
 	//R type instruction functions
 	void add(int sourceRegister, int targetRegister, int destinationRegister)
@@ -318,7 +492,7 @@ public:
 		destinationContent = sourceContent - targetContent;
 		if(destinationExists == true)
 		{
-			//overwrite addition calculation in existing register
+			//overwrite subtraction calculation in existing register
 			cu = registerHead;
 			while(cu != NULL)
 			{
@@ -338,7 +512,55 @@ public:
 	};
 	void slt(int sourceRegister, int targetRegister, int destinationRegister)
 	{
-
+		//going to do this function last need to know how it works first
+		int sourceContent, targetContent, destinationContent;
+		bool destinationExists = false;
+		//need to check list if destination register exists if not new node must be created
+		registerNode *cu = registerHead;
+		while(cu != NULL)
+		{
+			if(cu -> registerNumber == sourceRegister)
+			{
+				sourceContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == targetRegister)
+			{
+				targetContent = cu -> registerContent;
+			}
+			else if(cu -> registerNumber == destinationRegister)
+			{
+				destinationExists = true;
+			}
+			cu = cu -> next;
+		}
+		//compare source and target values here
+		//if source is less than target: destination = 0 else destination = 1
+		if(sourceContent < targetContent)
+		{
+			destinationContent = 0;
+		}
+		else
+		{
+			destinationContent = 1;
+		}
+		if(destinationExists == true)
+		{
+			cu = registerHead;
+			while(cu != NULL)
+			{
+				if(cu -> registerNumber == destinationRegister)
+				{
+					cu -> registerContent = destinationContent;
+					break;
+				}
+				cu = cu -> next;
+			}
+		}
+		else
+		{
+			//destination does not exist, create and place accordingly
+			appendRegisterNode(destinationRegister, destinationContent);
+		}
 	};
 	//need to create a function to actually carry out instruction
 	//traverse the code list and carry out instructions on mem and reg lists
@@ -464,9 +686,9 @@ void mipsProcessor(string inputFileName, string outputFileName)
 	//call code execution
 	processor.executeCode(outputFileName);
 
-	processor.printRegisterList();
-	processor.printMemoryList();
-	processor.printCodeList();
+	//processor.printRegisterList();
+	//processor.printMemoryList();
+	//processor.printCodeList();
 
 	ils.close();
 }
