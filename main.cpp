@@ -164,9 +164,9 @@ public:
 			{
 				opcode += codeLine[i];
 			}
-			cout << opcode;
+			//cout << opcode;
 			opcodeNum = binaryStrToInt(opcode);
-			cout << opcodeNum << endl;
+			//cout << opcodeNum << endl;
 			//000000 00010 00011 00100 00000 100000
 			//will need to write code part to output file in if statements need to figure out how IF,ID, EX, MEM, and WB work first
 			if(opcodeNum == 0)
@@ -178,41 +178,41 @@ public:
 					sourceRegister += codeLine[i];
 
 				}
-				cout << sourceRegister;
+				//cout << sourceRegister;
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
-				cout << sourceRegisterNum << endl;
+				//cout << sourceRegisterNum << endl;
 				for(int i = 11; i < 16; i++)
 				{
 					//this tells me the target register
 					targetRegister += codeLine[i];
 				}
-				cout << targetRegister;
+				//cout << targetRegister;
 				targetRegisterNum = binaryStrToInt(targetRegister);
-				cout << targetRegisterNum << endl;
+				//cout << targetRegisterNum << endl;
 				for(int i = 16; i < 21; i++)
 				{
 					//this tells me the destination register
 					destinationRegister += codeLine[i];
 				}
-				cout << destinationRegister;
+				//cout << destinationRegister;
 				destinationRegisterNum = binaryStrToInt(destinationRegister);
-				cout << destinationRegisterNum << endl;
+				//cout << destinationRegisterNum << endl;
 				for(int i = 21; i < 26; i++)
 				{
 					//this tells me the shift amount (usually and hopefully always zero)
 					shiftAmount += codeLine[i];
 				}
-				cout << shiftAmount;
+				//cout << shiftAmount;
 				shiftAmountNum = binaryStrToInt(shiftAmount);
-				cout << shiftAmountNum << endl; 
+				//cout << shiftAmountNum << endl; 
 				for(int i = 26; i < 32; i++)
 				{
 					//this tells the function to carry out
 					function += codeLine[i];
 				}
-				cout << function;
+				//cout << function;
 				functionNum = binaryStrToInt(function);
-				cout << functionNum << endl;
+				//cout << functionNum << endl;
 				//if to go to the appropriate function
 				if(functionNum == 32)
 				{
@@ -241,27 +241,28 @@ public:
 				{
 					sourceRegister += codeLine[i];
 				}
-				cout << sourceRegister;
+				//cout << sourceRegister;
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
-				cout << sourceRegisterNum << endl;
+				//cout << sourceRegisterNum << endl;
 				for(int i = 11; i < 16; i++)
 				{
-					targetRegister += codeLine[i];
+					destinationRegister += codeLine[i];
 				}
-				cout << targetRegister;
-				targetRegisterNum = binaryStrToInt(targetRegister);
-				cout << targetRegisterNum << endl;
+				//cout << targetRegister;
+				destinationRegisterNum = binaryStrToInt(destinationRegister);
+				//cout << targetRegisterNum << endl;
 				for(int i = 16; i < 32; i++)
 				{
 					offset += codeLine[i];
 				}
-				cout << offset;
+				//cout << offset;
 				offsetNum = binaryStrToInt(offset);
-				cout << offsetNum << endl;
+				//cout << offsetNum << endl;
 				if(opcodeNum == 35)
 				{
 					//call loadWord function
-					//loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
+					cout << destinationRegisterNum << endl;
+					loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
 				}
 				else if(opcodeNum == 43)
 				{
@@ -307,6 +308,7 @@ public:
 	void loadWord(int sourceRegister, int destinationRegister, int offset)
 	{
 		//need to access memory list here
+		//cout << destinationRegister << endl;
 		int memLocation, sourceContent, destinationContent;
 		bool destinationExists = false; 
 		registerNode *cuRegister = registerHead;
@@ -324,11 +326,13 @@ public:
 			cuRegister = cuRegister -> next;
 		}
 		memLocation = sourceContent + offset;
+		//cout << memLocation << endl;
 		while(cuMemory != NULL)
 		{
 			if(cuMemory -> memoryLocation == memLocation)
 			{
-				destinationContent = cuMemory -> memoryContents;
+				destinationContent = cuMemory -> memoryContents; //this maybe needs to change
+				//cout <<  cuMemory -> memoryLocation << " " <<  cuMemory -> memoryContents;
 				break;
 			}
 			cuMemory = cuMemory -> next;
@@ -341,7 +345,8 @@ public:
 			{
 				if(cuRegister -> registerNumber == destinationRegister)
 				{
-					cuRegister -> registerContent = destinationContent;
+					cuRegister -> registerContent = destinationContent; //this maybe needs to change
+					cout << destinationContent << endl;
 					break;
 				}
 				cuRegister = cuRegister -> next;
@@ -350,6 +355,7 @@ public:
 		else
 		{
 			//destination does not exist, create and place accordingly
+			//cout << destinationContent << " " <<  destinationRegister << endl;
 			appendRegisterNode(destinationRegister, destinationContent);
 		}
 	};
@@ -368,19 +374,21 @@ public:
 			}
 			else if(cuRegister -> registerNumber == destinationRegister)
 			{
-				destinationContent = cuRegister -> registerContent;
+				destinationContent = cuRegister -> registerContent; //this maybe needs to change
 			}
 			cuRegister = cuRegister -> next;
 		}
 		memLocation = offset + sourceContent;
+		//cout << memLocation << endl;
 		while(cuMemory != NULL)
 		{
 			if(cuMemory -> memoryLocation == memLocation)
 			{
 				memoryExists = true;
-				cuMemory -> memoryContents = destinationContent;
+				cuMemory -> memoryContents = destinationContent; //this maybe needs to change 
 				break;
 			}
+			cuMemory = cuMemory -> next;
 		}
 		if(memoryExists == false)
 		{
@@ -447,6 +455,7 @@ public:
 			cu = cu -> next;
 		}
 		destinationContent = sourceContent + targetContent;
+		//cout << destinationContent << endl;
 		if(destinationExists == true)
 		{
 			//overwrite addition calculation in existing register
@@ -489,7 +498,7 @@ public:
 			}
 			cu = cu -> next;
 		}
-		destinationContent = sourceContent - targetContent;
+		//destinationContent = sourceContent - targetContent;
 		if(destinationExists == true)
 		{
 			//overwrite subtraction calculation in existing register
@@ -683,12 +692,15 @@ void mipsProcessor(string inputFileName, string outputFileName)
 			codeCount++;
 		}
 	}
+	processor.printRegisterList();
+	processor.printMemoryList();
+	processor.printCodeList();
+	cout << endl;
 	//call code execution
 	processor.executeCode(outputFileName);
-
-	//processor.printRegisterList();
-	//processor.printMemoryList();
-	//processor.printCodeList();
+	cout << endl;
+	processor.printRegisterList();
+	processor.printMemoryList();
 
 	ils.close();
 }
