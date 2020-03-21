@@ -167,7 +167,6 @@ public:
 			//cout << opcode;
 			opcodeNum = binaryStrToInt(opcode);
 			//cout << opcodeNum << endl;
-			//000000 00010 00011 00100 00000 100000
 			//will need to write code part to output file in if statements need to figure out how IF,ID, EX, MEM, and WB work first
 			if(opcodeNum == 0)
 			{
@@ -261,7 +260,7 @@ public:
 				if(opcodeNum == 35)
 				{
 					//call loadWord function
-					cout << destinationRegisterNum << endl;
+					//cout << destinationRegisterNum << endl;
 					loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
 				}
 				else if(opcodeNum == 43)
@@ -300,8 +299,8 @@ public:
 			cuCode = cuCode -> next;
 			linesExecuted++;
 		}
+		//here sort memory and register lists
 		//here write to file reg and mem part////////////////////////////////////
-
 		ols.close();
 	};
 	//I type instruction functions
@@ -319,7 +318,7 @@ public:
 			{
 				sourceContent = cuRegister -> registerContent;
 			}
-			else if(cuRegister -> registerNumber == destinationRegister)
+			if(cuRegister -> registerNumber == destinationRegister)
 			{
 				destinationExists = true;
 			}
@@ -346,7 +345,7 @@ public:
 				if(cuRegister -> registerNumber == destinationRegister)
 				{
 					cuRegister -> registerContent = destinationContent; //this maybe needs to change
-					cout << destinationContent << endl;
+					//cout << destinationContent << endl;
 					break;
 				}
 				cuRegister = cuRegister -> next;
@@ -372,7 +371,7 @@ public:
 			{
 				sourceContent = cuRegister -> registerContent;
 			}
-			else if(cuRegister -> registerNumber == destinationRegister)
+			if(cuRegister -> registerNumber == destinationRegister)
 			{
 				destinationContent = cuRegister -> registerContent; //this maybe needs to change
 			}
@@ -406,7 +405,7 @@ public:
 			{
 				sourceContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == destinationRegister)
+			if(cu -> registerNumber == destinationRegister)
 			{
 				destinationExists = true;
 			}
@@ -444,30 +443,32 @@ public:
 			{
 				sourceContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == targetRegister)
+			if(cu -> registerNumber == targetRegister)
 			{
 				targetContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == destinationRegister)
+			if(cu -> registerNumber == destinationRegister)
 			{
 				destinationExists = true;
 			}
 			cu = cu -> next;
 		}
 		destinationContent = sourceContent + targetContent;
-		//cout << destinationContent << endl;
+		//cout << destinationRegister << " "  << endl;
 		if(destinationExists == true)
 		{
 			//overwrite addition calculation in existing register
-			cu = registerHead;
+			registerNode *cuR;
+			cuR = registerHead;
+			//cout << cuR -> registerNumber << endl;
 			while(cu != NULL)
 			{
-				if(cu -> registerNumber == destinationRegister)
+				if(cuR -> registerNumber == destinationRegister)
 				{
-					cu -> registerContent = destinationContent;
+					cuR -> registerContent = destinationContent;
 					break;
 				}
-				cu = cu -> next;
+				cuR = cuR -> next;
 			}
 		}
 		else
@@ -488,11 +489,11 @@ public:
 			{
 				sourceContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == targetRegister)
+			if(cu -> registerNumber == targetRegister)
 			{
 				targetContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == destinationRegister)
+			if(cu -> registerNumber == destinationRegister)
 			{
 				destinationExists = true;
 			}
@@ -501,16 +502,17 @@ public:
 		//destinationContent = sourceContent - targetContent;
 		if(destinationExists == true)
 		{
-			//overwrite subtraction calculation in existing register
-			cu = registerHead;
+			//overwrite addition calculation in existing register
+			registerNode *cuR;
+			cuR = registerHead;
 			while(cu != NULL)
 			{
-				if(cu -> registerNumber == destinationRegister)
+				if(cuR -> registerNumber == destinationRegister)
 				{
-					cu -> registerContent = destinationContent;
+					cuR -> registerContent = destinationContent;
 					break;
 				}
-				cu = cu -> next;
+				cuR = cuR -> next;
 			}
 		}
 		else
@@ -532,11 +534,11 @@ public:
 			{
 				sourceContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == targetRegister)
+			if(cu -> registerNumber == targetRegister)
 			{
 				targetContent = cu -> registerContent;
 			}
-			else if(cu -> registerNumber == destinationRegister)
+			if(cu -> registerNumber == destinationRegister)
 			{
 				destinationExists = true;
 			}
@@ -554,15 +556,17 @@ public:
 		}
 		if(destinationExists == true)
 		{
-			cu = registerHead;
+			//overwrite addition calculation in existing register
+			registerNode *cuR;
+			cuR = registerHead;
 			while(cu != NULL)
 			{
-				if(cu -> registerNumber == destinationRegister)
+				if(cuR -> registerNumber == destinationRegister)
 				{
-					cu -> registerContent = destinationContent;
+					cuR -> registerContent = destinationContent;
 					break;
 				}
-				cu = cu -> next;
+				cuR = cuR -> next;
 			}
 		}
 		else
@@ -571,9 +575,6 @@ public:
 			appendRegisterNode(destinationRegister, destinationContent);
 		}
 	};
-	//need to create a function to actually carry out instruction
-	//traverse the code list and carry out instructions on mem and reg lists
-	//probably want to create functions that are 8 possible functions
 };
 
 void mipsProcessor(string inputFileName, string outputFileName)
@@ -698,8 +699,9 @@ void mipsProcessor(string inputFileName, string outputFileName)
 	cout << endl;
 	//call code execution
 	processor.executeCode(outputFileName);
-	cout << endl;
+	cout << endl << "REGISTERS" << endl;
 	processor.printRegisterList();
+	cout << "MEMORY" << endl;
 	processor.printMemoryList();
 
 	ils.close();
