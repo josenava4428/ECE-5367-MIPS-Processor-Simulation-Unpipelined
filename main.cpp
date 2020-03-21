@@ -11,6 +11,9 @@
 #include <math.h>
 
 using namespace std;
+//Check list of things to finish code:
+//	The timing of the instruction sequence should show cycle numbers in rows, while columns should be labeled with instruction numbers aspect 
+//	output file formating
 
 int strToInt(string number){
 	int stringSize = number.size();
@@ -153,6 +156,8 @@ public:
 		ols.open(outputFile);
 
 		codeNode *cuCode;
+		registerNode *cuReg;
+		memoryNode *cuMem;
 		cuCode = codeHead;
 		int linesExecuted = 0;
 		while(cuCode != NULL)
@@ -164,9 +169,7 @@ public:
 			{
 				opcode += codeLine[i];
 			}
-			//cout << opcode;
 			opcodeNum = binaryStrToInt(opcode);
-			//cout << opcodeNum << endl;
 			//will need to write code part to output file in if statements need to figure out how IF,ID, EX, MEM, and WB work first
 			if(opcodeNum == 0)
 			{
@@ -177,41 +180,30 @@ public:
 					sourceRegister += codeLine[i];
 
 				}
-				//cout << sourceRegister;
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
-				//cout << sourceRegisterNum << endl;
 				for(int i = 11; i < 16; i++)
 				{
 					//this tells me the target register
 					targetRegister += codeLine[i];
 				}
-				//cout << targetRegister;
 				targetRegisterNum = binaryStrToInt(targetRegister);
-				//cout << targetRegisterNum << endl;
 				for(int i = 16; i < 21; i++)
 				{
-					//this tells me the destination register
 					destinationRegister += codeLine[i];
 				}
-				//cout << destinationRegister;
 				destinationRegisterNum = binaryStrToInt(destinationRegister);
-				//cout << destinationRegisterNum << endl;
 				for(int i = 21; i < 26; i++)
 				{
 					//this tells me the shift amount (usually and hopefully always zero)
 					shiftAmount += codeLine[i];
 				}
-				//cout << shiftAmount;
 				shiftAmountNum = binaryStrToInt(shiftAmount);
-				//cout << shiftAmountNum << endl; 
 				for(int i = 26; i < 32; i++)
 				{
 					//this tells the function to carry out
 					function += codeLine[i];
 				}
-				//cout << function;
 				functionNum = binaryStrToInt(function);
-				//cout << functionNum << endl;
 				//if to go to the appropriate function
 				if(functionNum == 32)
 				{
@@ -240,27 +232,20 @@ public:
 				{
 					sourceRegister += codeLine[i];
 				}
-				//cout << sourceRegister;
 				sourceRegisterNum = binaryStrToInt(sourceRegister);
-				//cout << sourceRegisterNum << endl;
 				for(int i = 11; i < 16; i++)
 				{
 					destinationRegister += codeLine[i];
 				}
-				//cout << targetRegister;
 				destinationRegisterNum = binaryStrToInt(destinationRegister);
-				//cout << targetRegisterNum << endl;
 				for(int i = 16; i < 32; i++)
 				{
 					offset += codeLine[i];
 				}
-				//cout << offset;
 				offsetNum = binaryStrToInt(offset);
-				//cout << offsetNum << endl;
 				if(opcodeNum == 35)
 				{
 					//call loadWord function
-					//cout << destinationRegisterNum << endl;
 					loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
 				}
 				else if(opcodeNum == 43)
@@ -278,7 +263,7 @@ public:
 					//call beq function
 					if(sourceRegisterNum == destinationRegisterNum)
 					{
-						for(int i = 0; i < offsetNum; i++) //might not need the minus one
+						for(int i = 0; i < offsetNum; i++)
 						{
 							cuCode = cuCode -> next;
 						}
@@ -289,7 +274,7 @@ public:
 					//call ben function
 					if(sourceRegisterNum != destinationRegisterNum)
 					{
-						for(int i = 0; i < offsetNum; i++) //might not need the minus one
+						for(int i = 0; i < offsetNum; i++)
 						{
 							cuCode = cuCode -> next;
 						}
@@ -299,15 +284,28 @@ public:
 			cuCode = cuCode -> next;
 			linesExecuted++;
 		}
-		//here sort memory and register lists
-		//here write to file reg and mem part////////////////////////////////////
+		cuReg = registerHead;
+		sortRegisters(cuReg);
+		ols << "REGISTERS" << endl;
+		while(cuReg != NULL)
+		{
+			ols << cuReg -> registerNumber << " " << cuReg -> registerContent << endl;
+			cuReg = cuReg -> next;
+		}
+		cuMem = memoryHead;
+		sortMemory(cuMem);
+		ols << "MEMORY" << endl;
+		while(cuMem != NULL)
+		{
+			ols << cuMem -> memoryLocation << " " << cuMem -> memoryContents << endl;
+			cuMem = cuMem -> next;
+		}
 		ols.close();
 	};
 	//I type instruction functions
 	void loadWord(int sourceRegister, int destinationRegister, int offset)
 	{
 		//need to access memory list here
-		//cout << destinationRegister << endl;
 		int memLocation, sourceContent, destinationContent;
 		bool destinationExists = false; 
 		registerNode *cuRegister = registerHead;
@@ -325,13 +323,11 @@ public:
 			cuRegister = cuRegister -> next;
 		}
 		memLocation = sourceContent + offset;
-		//cout << memLocation << endl;
 		while(cuMemory != NULL)
 		{
 			if(cuMemory -> memoryLocation == memLocation)
 			{
-				destinationContent = cuMemory -> memoryContents; //this maybe needs to change
-				//cout <<  cuMemory -> memoryLocation << " " <<  cuMemory -> memoryContents;
+				destinationContent = cuMemory -> memoryContents;
 				break;
 			}
 			cuMemory = cuMemory -> next;
@@ -344,8 +340,7 @@ public:
 			{
 				if(cuRegister -> registerNumber == destinationRegister)
 				{
-					cuRegister -> registerContent = destinationContent; //this maybe needs to change
-					//cout << destinationContent << endl;
+					cuRegister -> registerContent = destinationContent;
 					break;
 				}
 				cuRegister = cuRegister -> next;
@@ -354,7 +349,6 @@ public:
 		else
 		{
 			//destination does not exist, create and place accordingly
-			//cout << destinationContent << " " <<  destinationRegister << endl;
 			appendRegisterNode(destinationRegister, destinationContent);
 		}
 	};
@@ -373,18 +367,17 @@ public:
 			}
 			if(cuRegister -> registerNumber == destinationRegister)
 			{
-				destinationContent = cuRegister -> registerContent; //this maybe needs to change
+				destinationContent = cuRegister -> registerContent;
 			}
 			cuRegister = cuRegister -> next;
 		}
 		memLocation = offset + sourceContent;
-		//cout << memLocation << endl;
 		while(cuMemory != NULL)
 		{
 			if(cuMemory -> memoryLocation == memLocation)
 			{
 				memoryExists = true;
-				cuMemory -> memoryContents = destinationContent; //this maybe needs to change 
+				cuMemory -> memoryContents = destinationContent; 
 				break;
 			}
 			cuMemory = cuMemory -> next;
@@ -454,14 +447,12 @@ public:
 			cu = cu -> next;
 		}
 		destinationContent = sourceContent + targetContent;
-		//cout << destinationRegister << " "  << endl;
 		if(destinationExists == true)
 		{
 			//overwrite addition calculation in existing register
 			registerNode *cuR;
 			cuR = registerHead;
-			//cout << cuR -> registerNumber << endl;
-			while(cu != NULL)
+			while(cuR != NULL)
 			{
 				if(cuR -> registerNumber == destinationRegister)
 				{
@@ -505,7 +496,7 @@ public:
 			//overwrite addition calculation in existing register
 			registerNode *cuR;
 			cuR = registerHead;
-			while(cu != NULL)
+			while(cuR != NULL)
 			{
 				if(cuR -> registerNumber == destinationRegister)
 				{
@@ -559,7 +550,7 @@ public:
 			//overwrite addition calculation in existing register
 			registerNode *cuR;
 			cuR = registerHead;
-			while(cu != NULL)
+			while(cuR != NULL)
 			{
 				if(cuR -> registerNumber == destinationRegister)
 				{
@@ -574,6 +565,82 @@ public:
 			//destination does not exist, create and place accordingly
 			appendRegisterNode(destinationRegister, destinationContent);
 		}
+	};
+	//Sorting functions
+	void sortRegisters(registerNode *start)
+	{
+		//need to fix this
+		int swapped, i; 
+    	struct registerNode *ptr1; 
+    	struct registerNode *lptr = NULL; 
+  
+    	/* Checking for empty list */
+    	if (start == NULL) 
+        	return; 
+  
+    	do
+    	{ 
+        	swapped = 0; 
+        	ptr1 = start; 
+  
+        	while (ptr1->next != lptr) 
+        	{ 
+            	if (ptr1 -> registerNumber > ptr1 -> next -> registerNumber) 
+            	{  
+                	swapRegister(ptr1, ptr1 -> next); 
+                	swapped = 1; 
+            	} 
+            	ptr1 = ptr1 -> next; 
+        	} 
+        	lptr = ptr1; 
+    	} 
+    	while (swapped);
+	};
+	void sortMemory(memoryNode *start)
+	{
+		int swapped, i; 
+    	struct memoryNode *ptr1; 
+    	struct memoryNode *lptr = NULL; 
+  
+    	/* Checking for empty list */
+    	if (start == NULL) 
+        	return; 
+  
+    	do
+    	{ 
+        	swapped = 0; 
+        	ptr1 = start; 
+  
+        	while (ptr1->next != lptr) 
+        	{ 
+            	if (ptr1 -> memoryLocation > ptr1 -> next -> memoryLocation) 
+            	{  
+                	swapMemory(ptr1, ptr1 -> next); 
+                	swapped = 1; 
+            	} 
+            	ptr1 = ptr1 -> next; 
+        	} 
+        	lptr = ptr1; 
+    	} 
+    	while (swapped);
+	};
+	void swapRegister(registerNode *a, registerNode *b)
+	{
+		int temp = a -> registerNumber;
+		int temp2 = a -> registerContent; 
+    	a -> registerNumber = b -> registerNumber; 
+    	a -> registerContent = b -> registerContent;
+    	b -> registerNumber = temp;
+    	b -> registerContent = temp2;
+	};
+	void swapMemory(memoryNode *a, memoryNode *b)
+	{
+		int temp = a -> memoryLocation;
+		int temp2 = a -> memoryContents; 
+    	a -> memoryLocation = b -> memoryLocation; 
+    	a -> memoryContents = b -> memoryContents;
+    	b -> memoryLocation = temp;
+    	b -> memoryContents = temp2;
 	};
 };
 
