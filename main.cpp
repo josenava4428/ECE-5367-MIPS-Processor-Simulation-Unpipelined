@@ -11,9 +11,6 @@
 #include <math.h>
 
 using namespace std;
-//Check list of things to finish code:
-//	The timing of the instruction sequence should show cycle numbers in rows, while columns should be labeled with instruction numbers aspect 
-//	output file formating
 
 int strToInt(string number){
 	int stringSize = number.size();
