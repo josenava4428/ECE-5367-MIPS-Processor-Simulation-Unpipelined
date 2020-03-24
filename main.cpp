@@ -159,7 +159,8 @@ public:
 		registerNode *cuReg;
 		memoryNode *cuMem;
 		cuCode = codeHead;
-		int linesExecuted = 0;
+		int linesExecuted = 1;
+		int instructionSubCount = 1;
 		while(cuCode != NULL)
 		{
 			string opcode, sourceRegister, targetRegister, destinationRegister, shiftAmount, function, offset, codeLine;
@@ -209,16 +210,43 @@ public:
 				{
 					//function to be carried out is addition
 					add(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+					//Write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-WB" << endl;
+					instructionSubCount++;
 				}
 				else if(functionNum == 34)
 				{
 					//function to be carried out is subtraction
 					sub(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+					//write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-WB" << endl;
+					instructionSubCount++; 
 				}
 				else if(functionNum == 42)
 				{
 					//function to be carried out is set less than
 					slt(sourceRegisterNum, targetRegisterNum, destinationRegisterNum);
+					//write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-WB" << endl;
+					instructionSubCount++;
 				}
 				else
 				{
@@ -247,16 +275,45 @@ public:
 				{
 					//call loadWord function
 					loadWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
+					//write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-MEM" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-WB" << endl;
+					instructionSubCount++;
 				}
 				else if(opcodeNum == 43)
 				{
 					//call storeWord function
 					storeWord(sourceRegisterNum, destinationRegisterNum, offsetNum);
+					//write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-MEM" << endl;
+					instructionSubCount++;
 				}
 				else if(opcodeNum == 8)
 				{
 					//call addI function
 					addI(sourceRegisterNum, destinationRegisterNum, offsetNum);
+					//write to output file here FIX THIS 
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-WB" << endl;
+					instructionSubCount++;
 				}
 				else if(opcodeNum == 4)
 				{
@@ -268,10 +325,17 @@ public:
 							cuCode = cuCode -> next;
 						}
 					}
+					//write to output file here
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
 				}
 				else if(opcodeNum == 5)
 				{
-					//call ben function
+					//call bne function
 					if(sourceRegisterNum != destinationRegisterNum)
 					{
 						for(int i = 0; i < offsetNum; i++)
@@ -279,6 +343,13 @@ public:
 							cuCode = cuCode -> next;
 						}
 					}
+					//write to output file here 
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-IF" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-ID" << endl;
+					instructionSubCount++;
+					ols << "C#" << instructionSubCount << " I" << linesExecuted << "-EX" << endl;
+					instructionSubCount++;
 				}
 			}
 			cuCode = cuCode -> next;
@@ -289,7 +360,7 @@ public:
 		ols << "REGISTERS" << endl;
 		while(cuReg != NULL)
 		{
-			ols << cuReg -> registerNumber << " " << cuReg -> registerContent << endl;
+			ols << "R" << cuReg -> registerNumber << " " << cuReg -> registerContent << endl;
 			cuReg = cuReg -> next;
 		}
 		cuMem = memoryHead;
@@ -760,16 +831,16 @@ void mipsProcessor(string inputFileName, string outputFileName)
 			codeCount++;
 		}
 	}
-	processor.printRegisterList();
-	processor.printMemoryList();
-	processor.printCodeList();
-	cout << endl;
-	//call code execution
-	processor.executeCode(outputFileName);
-	cout << endl << "REGISTERS" << endl;
-	processor.printRegisterList();
-	cout << "MEMORY" << endl;
-	processor.printMemoryList();
+	// processor.printRegisterList();
+	// processor.printMemoryList();
+	// processor.printCodeList();
+	// cout << endl;
+	// //call code execution
+	// processor.executeCode(outputFileName);
+	// cout << endl << "REGISTERS" << endl;
+	// processor.printRegisterList();
+	// cout << "MEMORY" << endl;
+	// processor.printMemoryList();
 
 	ils.close();
 }
