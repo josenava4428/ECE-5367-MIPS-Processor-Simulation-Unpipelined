@@ -315,7 +315,21 @@ public:
 				else if(opcodeNum == 4)
 				{
 					//call beq function
-					if(sourceRegisterNum == destinationRegisterNum)
+					int sourceContent, destinationContent;
+					registerNode *cu = registerHead;
+					while(cu != NULL)
+					{
+						if(cu -> registerNumber == sourceRegisterNum)
+						{
+							sourceContent = cu -> registerContent;
+						}
+						if(cu -> registerNumber == destinationRegisterNum)
+						{
+							destinationContent = cu-> registerContent;
+						}
+						cu = cu -> next;
+					}
+					if(sourceContent == destinationContent)
 					{
 						for(int i = 0; i < offsetNum; i++)
 						{
@@ -333,7 +347,21 @@ public:
 				else if(opcodeNum == 5)
 				{
 					//call bne function
-					if(sourceRegisterNum != destinationRegisterNum)
+					int sourceContent, destinationContent;
+					registerNode *cu = registerHead;
+					while(cu != NULL)
+					{
+						if(cu -> registerNumber == sourceRegisterNum)
+						{
+							sourceContent = cu -> registerContent;
+						}
+						if(cu -> registerNumber == destinationRegisterNum)
+						{
+							destinationContent = cu-> registerContent;
+						}
+						cu = cu -> next;
+					}
+					if(sourceContent != destinationContent)
 					{
 						for(int i = 0; i < offsetNum; i++)
 						{
@@ -558,7 +586,7 @@ public:
 			}
 			cu = cu -> next;
 		}
-		//destinationContent = sourceContent - targetContent;
+		destinationContent = sourceContent - targetContent;
 		if(destinationExists == true)
 		{
 			//overwrite addition calculation in existing register
@@ -833,7 +861,7 @@ void mipsProcessor(string inputFileName, string outputFileName)
 	// processor.printCodeList();
 	// cout << endl;
 	// //call code execution
-	// processor.executeCode(outputFileName);
+	processor.executeCode(outputFileName);
 	// cout << endl << "REGISTERS" << endl;
 	// processor.printRegisterList();
 	// cout << "MEMORY" << endl;
